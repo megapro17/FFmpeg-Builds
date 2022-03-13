@@ -1,0 +1,22 @@
+From bc353dabe094b1b2b04548e8195ae2e48883dad0 Mon Sep 17 00:00:00 2001
+From: megapro17 <megapro17@gmail.com>
+Date: Wed, 15 Dec 2021 19:52:02 +0300
+Subject: [PATCH] MP4 some codecs without strict
+
+---
+ libavformat/movenc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libavformat/movenc.c b/libavformat/movenc.c
+index 0f912dd01258..0b831f798b0e 100644
+--- a/libavformat/movenc.c
++++ b/libavformat/movenc.c
+@@ -6870,7 +6870,7 @@ static int mov_init(AVFormatContext *s)
+                            "%s in MP4 support is experimental, add "
+                            "'-strict %d' if you want to use it.\n",
+                            avcodec_get_name(track->par->codec_id), FF_COMPLIANCE_EXPERIMENTAL);
+-                    return AVERROR_EXPERIMENTAL;
++                    //return AVERROR_EXPERIMENTAL;
+                 }
+             }
+         } else if (st->codecpar->codec_type == AVMEDIA_TYPE_SUBTITLE) {

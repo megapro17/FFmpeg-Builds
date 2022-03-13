@@ -1,0 +1,40 @@
+From 4d293d4099f21705344c464a95da71c539e9785d Mon Sep 17 00:00:00 2001
+From: megapro17 <megapro17@gmail.com>
+Date: Mon, 6 Dec 2021 22:56:46 +0300
+Subject: [PATCH] Enable faststart by default
+
+---
+ libavformat/movenc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/libavformat/movenc.c b/libavformat/movenc.c
+index 38ff90833a62..4637017a38f5 100644
+--- a/libavformat/movenc.c
++++ b/libavformat/movenc.c
+@@ -6615,7 +6615,7 @@ static int mov_init(AVFormatContext *s)
+         mov->flags &= ~FF_MOV_FLAG_SKIP_SIDX;
+     }
+ 
+-    if (mov->flags & FF_MOV_FLAG_FASTSTART) {
++    if (1) {
+         mov->reserved_moov_size = -1;
+     }
+ 
+@@ -7015,7 +7015,7 @@ static int mov_write_header(AVFormatContext *s)
+             !mov->max_fragment_duration && !mov->max_fragment_size)
+             mov->flags |= FF_MOV_FLAG_FRAG_KEYFRAME;
+     } else {
+-        if (mov->flags & FF_MOV_FLAG_FASTSTART)
++        if (1)
+             mov->reserved_header_pos = avio_tell(pb);
+         mov_write_mdat_tag(pb, mov);
+     }
+@@ -7286,7 +7286,7 @@ static int mov_write_trailer(AVFormatContext *s)
+         }
+         avio_seek(pb, mov->reserved_moov_size > 0 ? mov->reserved_header_pos : moov_pos, SEEK_SET);
+ 
+-        if (mov->flags & FF_MOV_FLAG_FASTSTART) {
++        if (1) {
+             av_log(s, AV_LOG_INFO, "Starting second pass: moving the moov atom to the beginning of the file\n");
+             res = shift_data(s);
+             if (res < 0)
