@@ -24,10 +24,8 @@ while [[ $# -gt 0 ]]; do
         rm -rf "$REPACK_DIR"
         mkdir "$REPACK_DIR"
 
-        if [[ $INPUT == *.zip ]]; then
-            unzip "$INPUT" -d "$REPACK_DIR"
-        elif [[ $INPUT == *.tar.xz ]]; then
-            tar xvaf "$INPUT" -C "$REPACK_DIR"
+        if [[ $INPUT == *.7z ]]; then
+            7z x "$INPUT" -o"$REPACK_DIR"
         else
             echo "Unknown input file type: $INPUT"
             exit 1
@@ -52,12 +50,7 @@ while [[ $# -gt 0 ]]; do
 
         mv "$INAME" "$ONAME"
 
-        if [[ $INPUT == *.zip ]]; then
-            zip -9 -r "$RELEASE_DIR/$ONAME.zip" "$ONAME"
-        elif [[ $INPUT == *.tar.xz ]]; then
-            tar cvJf "$RELEASE_DIR/$ONAME.tar.xz" "$ONAME"
-        fi
-
+        7z a -mx9 "$RELEASE_DIR/$ONAME.7z" "$ONAME"
         rm -rf "$REPACK_DIR"
     ) &
 
