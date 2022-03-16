@@ -1,0 +1,22 @@
+From 308090b14495011dc7b0e96745dcbfe2b5fc35ce Mon Sep 17 00:00:00 2001
+From: megapro17 <megapro17@gmail.com>
+Date: Wed, 16 Mar 2022 03:07:32 +0300
+Subject: [PATCH] Enable hwaccel auto by default
+
+---
+ fftools/ffmpeg_opt.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/fftools/ffmpeg_opt.c b/fftools/ffmpeg_opt.c
+index 70e6502f2206..4caee034c58f 100644
+--- a/fftools/ffmpeg_opt.c
++++ b/fftools/ffmpeg_opt.c
+@@ -940,6 +940,8 @@ static void add_input_streams(OptionsContext *o, AVFormatContext *ic)
+                         exit_program(1);
+                     }
+                 }
++            } else {
++                ist->hwaccel_id = HWACCEL_AUTO;
+             }
+ 
+             MATCH_PER_STREAM_OPT(hwaccel_devices, str, hwaccel_device, ic, st);
