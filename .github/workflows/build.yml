@@ -1,10 +1,6 @@
 name: Build FFmpeg
 
 on:
-  push:
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
   workflow_dispatch:
     inputs:
       doRelease:
@@ -12,8 +8,6 @@ on:
         type: boolean
         default: false
         required: false
-  schedule:
-    - cron: '0 12 * * *'
 
 env:
   DOCKER_BUILDKIT: 1
@@ -177,7 +171,7 @@ jobs:
           RELDATE="$(date +'%Y-%m-%d %H:%M')"
           NAME="Auto-Build $RELDATE"
           TAGNAME="autobuild-$(date +'%Y-%m-%d-%H-%M')"
-          hub release create $(for a in artifacts/*.{7z}; do echo -a $a; done) -m "$NAME" -t "master" "$TAGNAME"
+          hub release create $(for a in artifacts/*.7z; do echo -a $a; done) -m "$NAME" -t "master" "$TAGNAME"
           echo "::set-output name=tag_name::${TAGNAME}"
           echo "::set-output name=rel_date::${RELDATE}"
         env:
@@ -186,7 +180,7 @@ jobs:
         run: |
           set -xe
           mkdir latest_artifacts
-          ./util/repack_latest.sh latest_artifacts artifacts/*.{7z}
+          ./util/repack_latest.sh latest_artifacts artifacts/*.7z
           NAME="Latest Auto-Build (${{ steps.create_release.outputs.rel_date }})"
           TAGNAME="latest"
           hub release delete "$TAGNAME" || true
