@@ -1,0 +1,107 @@
+From c6a7ecd3761de5135d8fb4c187e1d93325839d72 Mon Sep 17 00:00:00 2001
+From: Nil Admirari <nil-admirari@mailo.com>
+Date: Wed, 16 Feb 2022 14:25:07 +0300
+Subject: [PATCH v8 4/6] fftools/cmdutils.c: Remove MAX_PATH limit and replace
+ fopen with av_fopen_utf8
+
+---
+ fftools/cmdutils.c | 38 +++++++++++++++++++++++++++++---------
+ 1 file changed, 29 insertions(+), 9 deletions(-)
+
+diff --git a/fftools/cmdutils.c b/fftools/cmdutils.c
+index 5d7cdc3..a66dbb2 100644
+--- a/fftools/cmdutils.c
++++ b/fftools/cmdutils.c
+@@ -37,6 +37,7 @@
+ #include "libswresample/swresample.h"
+ #include "libavutil/avassert.h"
+ #include "libavutil/avstring.h"
++#include "libavutil/avutil.h"
+ #include "libavutil/channel_layout.h"
+ #include "libavutil/display.h"
+ #include "libavutil/mathematics.h"
+@@ -50,6 +51,7 @@
+ #include "opt_common.h"
+ #ifdef _WIN32
+ #include <windows.h>
++#include "compat/w32dlfcn.h"
+ #endif
+ 
+ AVDictionary *sws_dict;
+@@ -812,28 +814,43 @@ FILE *get_preset_file(char *filename, size_t filename_size,
+ {
+     FILE *f = NULL;
+     int i;
++#if HAVE_GETMODULEHANDLE && defined(_WIN32)
++    char *datadir = NULL;
++#endif
+     const char *base[3] = { getenv("FFMPEG_DATADIR"),
+                             getenv("HOME"),
+                             FFMPEG_DATADIR, };
+ 
+     if (is_path) {
+         av_strlcpy(filename, preset_name, filename_size);
+-        f = fopen(filename, "r");
++        f = av_fopen_utf8(filename, "r");
+     } else {
+ #if HAVE_GETMODULEHANDLE && defined(_WIN32)
+-        char datadir[MAX_PATH], *ls;
++        wchar_t *datadir_w = get_module_filename(NULL);
+         base[2] = NULL;
+ 
+-        if (GetModuleFileNameA(GetModuleHandleA(NULL), datadir, sizeof(datadir) - 1))
++        if (wchartoutf8(datadir_w, &datadir))
++            datadir = NULL;
++        av_free(datadir_w);
++
++        if (datadir)
+         {
+-            for (ls = datadir; ls < datadir + strlen(datadir); ls++)
++            char *ls;
++            for (ls = datadir; *ls; ls++)
+                 if (*ls == '\\') *ls = '/';
+ 
+             if (ls = strrchr(datadir, '/'))
+             {
+-                *ls = 0;
+-                strncat(datadir, "/ffpresets",  sizeof(datadir) - 1 - strlen(datadir));
+-                base[2] = datadir;
++                const ptrdiff_t datadir_len = ls - datadir;
++                const size_t desired_size = datadir_len + strlen("/ffpresets") + 1;
++                char *new_datadir = av_realloc_array(
++                    datadir, desired_size, sizeof *datadir);
++                if (new_datadir) {
++                    datadir = new_datadir;
++                    datadir[datadir_len] = 0;
++                    strncat(datadir, "/ffpresets",  desired_size - 1 - datadir_len);
++                    base[2] = datadir;
++                }
+             }
+         }
+ #endif
+@@ -842,17 +859,20 @@ FILE *get_preset_file(char *filename, size_t filename_size,
+                 continue;
+             snprintf(filename, filename_size, "%s%s/%s.ffpreset", base[i],
+                      i != 1 ? "" : "/.ffmpeg", preset_name);
+-            f = fopen(filename, "r");
++            f = av_fopen_utf8(filename, "r");
+             if (!f && codec_name) {
+                 snprintf(filename, filename_size,
+                          "%s%s/%s-%s.ffpreset",
+                          base[i], i != 1 ? "" : "/.ffmpeg", codec_name,
+                          preset_name);
+-                f = fopen(filename, "r");
++                f = av_fopen_utf8(filename, "r");
+             }
+         }
+     }
+ 
++#if HAVE_GETMODULEHANDLE && defined(_WIN32)
++    av_free(datadir);
++#endif
+     return f;
+ }
+ 
+-- 
+2.32.0
+
