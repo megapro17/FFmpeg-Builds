@@ -1,6 +1,6 @@
 FF_CONFIGURE="--enable-gpl --enable-version3 --disable-debug"
 FF_CFLAGS=""
 FF_CXXFLAGS=""
-FF_LDFLAGS=""
+FF_LDFLAGS="-Wl,--allow-multiple-definition"
 GIT_BRANCH="master"
 LICENSE_FILE="COPYING.GPLv3"
